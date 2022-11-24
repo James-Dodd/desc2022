@@ -13,7 +13,7 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
-import { data } from "../resultsVTwo";
+import { data } from "../results1";
 
 const Dashboard = () => {
   const [age, setAge] = useState("");
@@ -38,15 +38,21 @@ const Dashboard = () => {
     setCat(event.target.value);
   };
 
-  const dataToUse = data.sort(
-    (a, b) => a.transaction_amount > b.transaction_amount
-  );
-
   const cityToUsea = data.map((b) => b.city);
   const cityToUse = [...new Set(cityToUsea)];
 
   const tempa = data.map((b)=> b.merchant_category_code);
   const merchantToUse = [...new Set(tempa)]
+
+  let res = data.reduce((ac,a) => {
+    let ind = ac.findIndex(x => x.transaction_amount_bins === a.transaction_amount_bins);
+    ind === -1 ? ac.push(a) : ac[ind].kpi += a.kpi;
+    return ac;
+  },[])
+
+  const dataTempB = res.sort((a,b)=>a.transaction_amount_bins.split(',')[0].replace(/[{()}]/g, '')>b.transaction_amount_bins.split(',')[0].replace(/[{()}]/g, ''))
+
+  console.log('here is data to use ---->', res)
   return (
     <div className="h-screen p-2 flex justify-center items-center flex-col">
       <div className="w-grow h-10 m-5 bg-purple-300 rounded-full flex justify-start items-center w-5/6 p-10 gap-3">
@@ -126,7 +132,7 @@ const Dashboard = () => {
           <BarChart
             width={500}
             height={300}
-            data={dataToUse}
+            data={dataTempB}
             margin={{
               top: 5,
               right: 30,
@@ -135,7 +141,7 @@ const Dashboard = () => {
             }}
           >
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="transaction_amount" />
+            <XAxis dataKey="transaction_amount_bins" />
             <YAxis />
             <Tooltip />
             <Legend />
